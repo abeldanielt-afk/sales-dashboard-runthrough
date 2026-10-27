@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sales Dashboard: walked through with sample data</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF1F4; --panel:#FFFFFF; --ink:#15202B; --muted:#5A6878; --line:#D5DCE3;
+  --screen:#162231; --screen-2:#1D2C3E; --screen-ink:#E8EEF5; --screen-muted:#93A3B6; --screen-line:#2A3B50;
+  --blue:#2F6FED; --green:#2E9C6A; --red:#C9433F; --amber:#C97A1E;
+  color-scheme:light;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1720; --panel:#16212D; --ink:#E6ECF2; --muted:#98A6B6; --line:#2A3846;
+    --screen:#0B121A; --screen-2:#121D29; --screen-line:#233244;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1720; --panel:#16212D; --ink:#E6ECF2; --muted:#98A6B6; --line:#2A3846;
+  --screen:#0B121A; --screen-2:#121D29; --screen-line:#233244; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:16px;line-height:1.55}
+a{color:var(--blue)}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px;border-radius:4px}
+.wrap{max-width:1240px;margin:0 auto;padding:40px 24px 64px}
+header.top{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end;margin-bottom:28px}
+h1{font-size:clamp(28px,4vw,44px);line-height:1.1;margin:0 0 10px;font-weight:700;letter-spacing:-.01em;max-width:22ch}
+.lede{margin:0;color:var(--muted);max-width:68ch}
+.credit{font-size:14px;color:var(--muted);text-align:right;max-width:34ch}
+.credit strong{color:var(--ink);font-weight:600}
+
+.tour{display:grid;grid-template-columns:minmax(260px,360px) minmax(0,1fr);gap:28px;align-items:start}
+.steps{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px;position:sticky;top:16px}
+.steps ol{list-style:none;margin:0;padding:0;counter-reset:s}
+.steps li{counter-increment:s}
+.steps ol button{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:28px 1fr;gap:10px;width:100%;padding:10px 12px;border-radius:10px;color:var(--muted)}
+.steps ol button::before{content:counter(s);font-family:"IBM Plex Sans Condensed",sans-serif;font-weight:600;color:var(--muted);font-size:15px;line-height:1.5}
+.steps ol button span{display:block}
+.steps ol button .v{font-weight:600;color:var(--ink);font-size:15px}
+.steps ol button .q{font-size:14px}
+.steps ol button[aria-current="step"]{background:color-mix(in srgb,var(--blue) 12%,transparent)}
+.steps ol button[aria-current="step"]::before{color:var(--blue)}
+.steps ol button:hover{background:color-mix(in srgb,var(--ink) 6%,transparent)}
+.nav{display:flex;gap:8px;padding:10px 4px 4px}
+.nav button{flex:1;font:inherit;font-weight:600;font-size:14px;padding:9px 12px;border-radius:9px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+.nav button.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.nav button:disabled{opacity:.45;cursor:default}
+
+.stage{display:grid;gap:18px;min-width:0}
+.steps{min-width:0}
+.question{font-size:clamp(22px,2.6vw,30px);font-weight:600;line-height:1.2;margin:0}
+.why{margin:6px 0 0;color:var(--muted);max-width:72ch}
+
+.screen{background:var(--screen);color:var(--screen-ink);border-radius:14px;overflow:hidden;border:1px solid var(--screen-line)}
+.bar{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--screen-line);background:var(--screen-2)}
+.bar .app{font-weight:700}
+.bar .view{color:var(--screen-muted);font-size:14px}
+.bar .tag{margin-left:auto;font-size:12px;color:var(--screen-muted);border:1px solid var(--screen-line);border-radius:999px;padding:3px 10px}
+.body{padding:16px;overflow-x:auto}
+.kpis{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:14px}
+.kpi{background:var(--screen-2);border:1px solid var(--screen-line);border-radius:10px;padding:10px 14px;min-width:150px}
+.kpi .l{font-size:12px;color:var(--screen-muted)}
+.kpi .n{font-family:"IBM Plex Sans Condensed",sans-serif;font-size:22px;font-weight:600}
+.kpi .n.blue{color:#7FA8FF}.kpi .n.green{color:#6FD3A4}.kpi .n.red{color:#FF8C87}.kpi .n.amber{color:#F2B56B}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.filters label{display:grid;gap:4px;font-size:12px;color:var(--screen-muted)}
+.filters select{font:inherit;font-size:13px;color:var(--screen-ink);background:var(--screen-2);border:1px solid var(--screen-line);border-radius:8px;padding:6px 10px}
+table{border-collapse:collapse;width:100%;font-size:13px;min-width:640px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--screen-line);text-align:left;vertical-align:top}
+th{color:var(--screen-muted);font-weight:500;font-size:12px;white-space:nowrap}
+td.num,th.num{text-align:right;font-family:"IBM Plex Sans Condensed",sans-serif;font-size:14px;white-space:nowrap}
+td.neg{color:#FF8C87}td.pos{color:#6FD3A4}
+tr.group td{color:var(--screen-muted);font-weight:600;background:var(--screen-2)}
+.pill{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid var(--screen-line);color:var(--screen-muted);white-space:nowrap}
+.st{font-size:12px;padding:2px 8px;border-radius:6px;white-space:nowrap}
+.st.won{background:#1F4D3A;color:#8FE3BB}.st.lost{background:#4E2426;color:#FFA9A5}.st.open{background:#24365A;color:#A9C4FF}.st.stall{background:#4B3A1E;color:#F5C98A}
+.flowbtn{font:inherit;font-size:11px;color:#A9C4FF;background:transparent;border:1px solid #33507F;border-radius:999px;padding:2px 9px;cursor:pointer;margin-left:6px}
+.flow{margin:12px 0 0;padding:12px;border:1px dashed var(--screen-line);border-radius:10px;font-size:13px}
+.flow ol{display:flex;flex-wrap:wrap;gap:6px;list-style:none;margin:8px 0 0;padding:0}
+.flow li{padding:4px 10px;border-radius:8px;background:var(--screen-2);border:1px solid var(--screen-line)}
+.flow li.now{border-color:#7FA8FF;color:#A9C4FF}
+.barchart{display:grid;gap:8px}
+.brow{display:grid;grid-template-columns:150px 1fr 90px;gap:10px;align-items:center;font-size:13px}
+.track{height:12px;background:var(--screen-2);border-radius:6px;overflow:hidden;display:flex}
+.track i{display:block;height:100%}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--screen-muted);margin:4px 0 12px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+
+.design{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.design h3{margin:0 0 10px;font-size:17px}
+.design .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px 28px}
+.design h4{margin:0 0 6px;font-size:14px;color:var(--muted);font-weight:600}
+.design ul{margin:0;padding-left:18px;font-size:15px}
+.design li{margin:3px 0}
+.note{font-size:13px;color:var(--muted);margin-top:28px;border-top:1px solid var(--line);padding-top:14px}
+
+@media (max-width:860px){
+  header.top{grid-template-columns:1fr}.credit{text-align:left}
+  .tour{grid-template-columns:minmax(0,1fr)}.steps{position:static}
+  .steps ol{display:flex;overflow-x:auto;gap:4px}.steps li{flex:0 0 220px}
+}
+@media (prefers-reduced-motion:no-preference){
+  .screen{transition:opacity .25s ease}
+  .screen.swap{opacity:.2}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Sales Dashboard: one place to see plan, pipeline and people</h1>
+      <p class="lede">A sales dashboard for a manufacturing IT services business. Each view answers one question leadership asks in its weekly and monthly reviews. This walkthrough uses made-up companies, people and numbers.</p>
+    </div>
+    <p class="credit"><strong>My part:</strong> I designed the views, the metrics, the questions each view answers and the review workflows. A developer built the React front end and deployed it.</p>
+  </header>
+
+  <div class="tour">
+    <nav class="steps" aria-label="Walkthrough steps">
+      <ol id="steps"></ol>
+      <div class="nav">
+        <button id="prev" type="button">Back</button>
+        <button id="next" type="button" class="primary">Next view</button>
+      </div>
+    </nav>
+
+    <main class="stage" aria-live="polite">
+      <div>
+        <h2 class="question" id="q"></h2>
+        <p class="why" id="why"></p>
+      </div>
+      <section class="screen" id="screen" aria-label="Sample screen">
+        <div class="bar"><span class="app">Sales Dashboard</span><span class="view" id="viewname"></span><span class="tag">Sample data</span></div>
+        <div class="body" id="body"></div>
+      </section>
+      <section class="design" aria-labelledby="dh">
+        <h3 id="dh">What I designed in this view</h3>
+        <div class="cols" id="design"></div>
+      </section>
+    </main>
+  </div>
+
+  <p class="note">All company names, people and figures on this page are invented for illustration. Amounts are in ₹ lakh (1 lakh = 100,000). Use the arrow keys or the list to move between views.</p>
+</div>
+
+<script>
+const months=['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'];
+const target=[120,150,180,160,220,240,260,180,180,190,200,220];
+const achieved=[60,95,150,120,170,130,90,null,null,null,null,null];
+const practices=['PLM','MES','ERP & SCM','AI and vision','Managed services','Data and infra'];
+const reps=['Rep A','Rep B','Rep C','Rep D','Rep E','Rep F'];
+const deals=[
+ ['Auto components maker','Line traceability','MES',18,'2026-11','Proposal','open',12,6,'Demo done; pricing under review',3.1,'Rep A'],
+ ['Pharma plant group','Batch record digitisation','MES',42,'2026-12','Negotiation','open',9,3,'Revised scope shared with QA head',4.4,'Rep B'],
+ ['Heavy equipment OEM','PLM upgrade and data migration','PLM',35,'2027-01','Qualification','open',21,14,'Awaiting current-state workshop date',1.8,'Rep C'],
+ ['Engineering services firm','ERP reporting rebuild','ERP & SCM',16,'2026-10','Closed Won','won',0,0,'PO received',2.6,'Rep D'],
+ ['Packaging manufacturer','Vision-based defect detection','AI and vision',22,'2026-11','Stalled','stall',38,41,'No reply since last proposal',6.2,'Rep A'],
+ ['Valves and fittings maker','Engineering change workflow','PLM',9,'2026-12','Requirement gathering','open',7,4,'ECR rework pain point confirmed',0.9,'Rep E'],
+ ['Chemicals producer','Application support contract','Managed services',60,'2027-02','Proposal','open',15,8,'Three-year option requested',2.2,'Rep B'],
+ ['Electrical goods maker','Infra monitoring','Data and infra',12,'2026-09','Closed Lost','lost',0,0,'Lost on price to incumbent',3.7,'Rep F'],
+];
+const stagesFlow=['Qualification','Requirement gathering','Value proposition','Proposal','Negotiation','Closed'];
+
+const V=[
+{view:'Plan View',q:'Are we on plan this year?',why:'The year’s committed target, split by month, against what has been booked. It shows the gap early enough to act on it.',
+ render(){
+  let ytdT=0,ytdA=0;const rows=months.map((m,i)=>{ytdT+=target[i];if(achieved[i]!=null)ytdA+=achieved[i];return {m,t:target[i],a:achieved[i],yt:ytdT,ya:achieved[i]!=null?ytdA:null}});
+  const tot=target.reduce((a,b)=>a+b,0),done=rows.filter(r=>r.a!=null).length,left=12-done,need=Math.round((tot-ytdA)/left);
+  const td=(v,cls='')=>`<td class="num ${cls}">${v==null?'–':v}</td>`;
+  return `<div class="kpis">
+   <div class="kpi"><div class="l">Committed target for the year</div><div class="n blue">${tot.toLocaleString('en-IN')}</div></div>
+   <div class="kpi"><div class="l">Booked so far</div><div class="n green">${ytdA}</div></div>
+   <div class="kpi"><div class="l">Still to book</div><div class="n red">${(tot-ytdA).toLocaleString('en-IN')}</div></div>
+   <div class="kpi"><div class="l">Needed each remaining month</div><div class="n amber">${need}</div></div></div>
+   <table><thead><tr><th>Metric</th>${months.map(m=>`<th class="num">${m}</th>`).join('')}</tr></thead><tbody>
+   <tr class="group"><td colspan="13">Monthly</td></tr>
+   <tr><td>Target</td>${rows.map(r=>td(r.t)).join('')}</tr>
+   <tr><td>Booked</td>${rows.map(r=>td(r.a,'pos')).join('')}</tr>
+   <tr><td>Variance</td>${rows.map(r=>td(r.a==null?null:r.a-r.t,'neg')).join('')}</tr>
+   <tr class="group"><td colspan="13">Year to date</td></tr>
+   <tr><td>Target</td>${rows.map(r=>td(r.yt)).join('')}</tr>
+   <tr><td>Booked</td>${rows.map(r=>td(r.ya,'pos')).join('')}</tr>
+   <tr><td>% of target</td>${rows.map(r=>td(r.ya==null?null:Math.round(r.ya/r.yt*100)+'%')).join('')}</tr>
+   </tbody></table>`},
+ design:[['Metrics',['Monthly and year-to-date variance','% of target achieved','Run rate needed in the remaining months']],['Workflow',['Targets set once a year, booked values pulled from the CRM','Opened at the start of every monthly review']]]},
+
+{view:'Sales View',q:'What is in the pipeline, and what is stuck?',why:'Every open and decided deal in one table, with how long it has sat in its stage and how long since anyone touched it.',
+ render(){
+  const open=deals.filter(d=>d[6]!=='won'&&d[6]!=='lost');const sum=open.reduce((a,d)=>a+d[3],0);const age=Math.round(open.reduce((a,d)=>a+d[7],0)/open.length);
+  return `<div class="kpis"><div class="kpi"><div class="l">Filtered pipeline</div><div class="n">${open.length} deals · <span style="color:#7FA8FF">₹${sum} L</span></div></div>
+   <div class="kpi"><div class="l">Average deal</div><div class="n">₹${Math.round(sum/open.length)} L</div></div>
+   <div class="kpi"><div class="l">Average stage age</div><div class="n amber">${age} days</div></div></div>
+   <div class="filters">${[['Timeline',['All deals','Closing this month','Closing next month','Closing this quarter']],['Practice',['All practices',...practices]],['Owner',['All owners',...reps]],['Stage',['All stages',...stagesFlow]]].map(([l,o])=>`<label>${l}<select>${o.map(x=>`<option>${x}</option>`).join('')}</select></label>`).join('')}</div>
+   <table><thead><tr><th>Client</th><th>Opportunity</th><th class="num">Amount</th><th>Close month</th><th>Stage</th><th class="num">Stage age</th><th class="num">Idle days</th><th>Latest comment</th><th>Owner</th></tr></thead><tbody>
+   ${deals.map((d,i)=>`<tr><td>${d[0]}</td><td>${d[1]} <span class="pill">${d[2]}</span><button class="flowbtn" type="button" data-i="${i}">Flow</button></td><td class="num">${d[3]}</td><td>${d[4]}</td><td><span class="st ${d[6]}">${d[5]}</span></td><td class="num">${d[7]}</td><td class="num ${d[8]>30?'neg':''}">${d[8]}</td><td>${d[9]}</td><td>${d[11]}</td></tr>`).join('')}
+   </tbody></table><div class="flow" id="flow">Select <b>Flow</b> on any deal to see the stages it has moved through.</div>`},
+ after(){document.querySelectorAll('.flowbtn').forEach(b=>b.addEventListener('click',()=>{const d=deals[+b.dataset.i];const cur=d[5].startsWith('Closed')?'Closed':(d[5]==='Stalled'?'Proposal':d[5]);const k=stagesFlow.findIndex(s=>cur.startsWith(s.split(' ')[0]));
+   document.getElementById('flow').innerHTML=`<b>${d[1]}</b>, ${d[0]}: ${d[5]}${d[6]==='stall'?' (stalled at proposal)':''}<ol>${stagesFlow.map((s,i)=>`<li class="${i===k?'now':''}">${s}</li>`).join('')}</ol>`}))},
+ design:[['Metrics',['Stage age: days in the current stage','Idle days: days since the last update','Average deal and average stage age for whatever is filtered']],['Workflow',['Filters match how reviews are run: by month, practice, owner and stage','Deals idle for more than 30 days are flagged in red']]]},
+
+{view:'Account View',q:'Where can we grow inside the accounts we already have?',why:'Each account with what it has bought and what is open, so the next practice to offer is easy to spot.',
+ render(){const acc=[['Auto components maker',[1,1,0,0,0,1],46,18],['Pharma plant group',[0,1,0,1,1,0],120,42],['Heavy equipment OEM',[1,0,1,0,0,0],64,35],['Chemicals producer',[0,0,1,0,1,0],30,60]];
+  return `<table><thead><tr><th>Account</th>${practices.map(p=>`<th>${p}</th>`).join('')}<th class="num">Won</th><th class="num">Open</th></tr></thead><tbody>
+  ${acc.map(a=>`<tr><td>${a[0]}</td>${a[1].map(x=>`<td>${x?'<span class="st won">Active</span>':'<span class="pill">Next to offer</span>'}</td>`).join('')}<td class="num">${a[2]}</td><td class="num">${a[3]}</td></tr>`).join('')}</tbody></table>`},
+ design:[['Metrics',['Practices active per account','Won and open value per account']],['Workflow',['Feeds the account plan for each strategic account','Gaps become the next cross-sell conversation']]]},
+
+{view:'Practice View',q:'Which offerings are selling, and which need help?',why:'Pipeline, won and lost value for each practice, so practice heads see their own numbers.',
+ render(){const p=[[90,140,30],[180,260,60],[110,150,25],[40,120,45],[150,90,10],[60,70,20]];const mx=Math.max(...p.map(x=>x[0]+x[1]+x[2]));
+  return `<div class="legend"><span><i style="background:#3FAE7F"></i>Won</span><span><i style="background:#5B8CF0"></i>Open</span><span><i style="background:#D86A65"></i>Lost</span></div>
+  <div class="barchart">${practices.map((n,i)=>`<div class="brow"><span>${n}</span><span class="track"><i style="width:${p[i][0]/mx*100}%;background:#3FAE7F"></i><i style="width:${p[i][1]/mx*100}%;background:#5B8CF0"></i><i style="width:${p[i][2]/mx*100}%;background:#D86A65"></i></span><span class="num" style="text-align:right">₹${p[i][0]+p[i][1]} L</span></div>`).join('')}</div>`},
+ design:[['Metrics',['Won, open and lost value by practice','Win ratio by practice']],['Workflow',['Each practice head reviews their own row each month']]]},
+
+{view:'Target View',q:'Is each owner on track for their number?',why:'Every owner’s annual target against what they have booked and what is still open.',
+ render(){const t=[[700,128,210],[1200,410,380],[1650,160,520],[1200,70,300],[520,12,140],[390,44,90]];
+  return `<table><thead><tr><th>Owner</th><th class="num">Target</th><th class="num">Booked</th><th class="num">% booked</th><th class="num">Open pipeline</th><th class="num">Cover</th></tr></thead><tbody>
+  ${reps.map((r,i)=>`<tr><td>${r}</td><td class="num">${t[i][0]}</td><td class="num pos">${t[i][1]}</td><td class="num">${Math.round(t[i][1]/t[i][0]*100)}%</td><td class="num">${t[i][2]}</td><td class="num ${t[i][2]/(t[i][0]-t[i][1])<0.5?'neg':''}">${(t[i][2]/(t[i][0]-t[i][1])).toFixed(1)}×</td></tr>`).join('')}</tbody></table>`},
+ design:[['Metrics',['% of target booked','Pipeline cover: open pipeline ÷ target still to book']],['Workflow',['Low cover flags who needs new pipeline, not just closing help']]]},
+
+{view:'Sales Rep View',q:'What does each person need to work on this week?',why:'One person’s deals, sorted by what needs attention: idle deals, deals closing soon and stalled deals.',
+ render(){const mine=deals.filter(d=>d[11]==='Rep A'||d[11]==='Rep B');
+  return `<div class="kpis"><div class="kpi"><div class="l">Closing this month</div><div class="n blue">2</div></div><div class="kpi"><div class="l">Idle over 30 days</div><div class="n red">1</div></div><div class="kpi"><div class="l">Stalled</div><div class="n amber">1</div></div></div>
+  <table><thead><tr><th>Opportunity</th><th>Stage</th><th class="num">Idle days</th><th>Next step</th></tr></thead><tbody>
+  ${mine.map(d=>`<tr><td>${d[1]}<br><span style="color:var(--screen-muted)">${d[0]}</span></td><td><span class="st ${d[6]}">${d[5]}</span></td><td class="num ${d[8]>30?'neg':''}">${d[8]}</td><td>${d[8]>30?'Call the sponsor this week':'Follow up on the proposal'}</td></tr>`).join('')}</tbody></table>`},
+ design:[['Metrics',['Idle and stalled counts per person','Deals closing this month']],['Workflow',['Used in one-to-ones between the sales head and each owner']]]},
+
+{view:'Sales Review',q:'What do we discuss in the weekly review?',why:'A fixed agenda built from the data: what closed, what slipped, what is stuck, and what closes next.',
+ render(){return `<table><thead><tr><th>Agenda item</th><th class="num">Deals</th><th class="num">Value</th><th>Decision needed</th></tr></thead><tbody>
+  <tr><td>Closed since last review</td><td class="num">2</td><td class="num">₹28 L</td><td>Hand over to delivery</td></tr>
+  <tr><td>Close date moved out</td><td class="num">3</td><td class="num">₹74 L</td><td>Confirm new date or downgrade</td></tr>
+  <tr><td>Idle over 30 days</td><td class="num">4</td><td class="num">₹96 L</td><td>Re-engage or close as lost</td></tr>
+  <tr><td>Closing in the next 30 days</td><td class="num">5</td><td class="num">₹131 L</td><td>Commit or call it upside</td></tr></tbody></table>`},
+ design:[['Questions',['What closed, and is delivery ready?','What slipped, and why?','What is stuck, and who unblocks it?']],['Workflow',['Same agenda every week, so the meeting runs from the screen, not slides']]]},
+
+{view:'Partner Network',q:'What are our partners bringing in?',why:'Pipeline and wins that came through partners, so each partnership is judged on results.',
+ render(){const p=[['Technology partner A','Referral',4,62,18],['Regional partner B','Joint pursuit',3,40,0],['Channel partner C','Resale',6,25,12]];
+  return `<table><thead><tr><th>Partner</th><th>Model</th><th class="num">Open deals</th><th class="num">Open value</th><th class="num">Won value</th></tr></thead><tbody>
+  ${p.map(x=>`<tr><td>${x[0]}</td><td>${x[1]}</td><td class="num">${x[2]}</td><td class="num">${x[3]}</td><td class="num pos">${x[4]}</td></tr>`).join('')}</tbody></table>`},
+ design:[['Metrics',['Partner-sourced pipeline and wins','Deals per partner model']],['Workflow',['Reviewed quarterly with each partner owner']]]},
+
+{view:'User Management',q:'Who sees what?',why:'Roles decide which views and which deals each person can open.',
+ render(){const r=[['Admin','All views, all deals','Manage users and targets'],['Leadership','All views, all deals','Read only'],['Sales head','All views, own team','Update targets for the team'],['Owner','Sales, Rep and Target views, own deals','Update own deals'],['Practice head','Practice and Account views','Read only']];
+  return `<table><thead><tr><th>Role</th><th>Can see</th><th>Can change</th></tr></thead><tbody>${r.map(x=>`<tr><td>${x[0]}</td><td>${x[1]}</td><td>${x[2]}</td></tr>`).join('')}</tbody></table>`},
+ design:[['Design',['Role-based access matched to the review structure','Each role sees what it needs for its own decisions']]]}
+];
+
+let cur=0;
+const stepsEl=document.getElementById('steps');
+stepsEl.innerHTML=V.map((v,i)=>`<li><button type="button" data-i="${i}"><span><span class="v">${v.view}</span><span class="q">${v.q}</span></span></button></li>`).join('');
+const btns=[...stepsEl.querySelectorAll('button')];
+btns.forEach(b=>b.addEventListener('click',()=>show(+b.dataset.i)));
+document.getElementById('prev').addEventListener('click',()=>show(cur-1));
+document.getElementById('next').addEventListener('click',()=>show(cur+1));
+document.addEventListener('keydown',e=>{if(e.target.tagName==='SELECT')return;if(e.key==='ArrowRight')show(cur+1);if(e.key==='ArrowLeft')show(cur-1)});
+const tokens=V.map(v=>v.view.toLowerCase().replace(/\s+/g,'-'));
+function show(i){
+  if(i<0||i>=V.length)return; cur=i; const v=V[i]; const scr=document.getElementById('screen');
+  scr.classList.add('swap');
+  setTimeout(()=>{
+    document.getElementById('q').textContent=v.q; document.getElementById('why').textContent=v.why;
+    document.getElementById('viewname').textContent=v.view;
+    document.getElementById('body').innerHTML=v.render(); v.after&&v.after();
+    document.getElementById('design').innerHTML=v.design.map(([h,l])=>`<div><h4>${h}</h4><ul>${l.map(x=>`<li>${x}</li>`).join('')}</ul></div>`).join('');
+    btns.forEach((b,k)=>b.toggleAttribute('aria-current',k===i)||b.setAttribute('aria-current',k===i?'step':'false'));
+    btns.forEach((b,k)=>{if(k===i)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current')});
+    document.getElementById('prev').disabled=i===0;
+    const n=document.getElementById('next'); n.disabled=i===V.length-1; n.textContent=i===V.length-1?'End of tour':'Next view';
+    scr.classList.remove('swap');
+    try{history.replaceState(null,'','#'+tokens[i])}catch(e){}
+  },120);
+}
+const start=tokens.indexOf(location.hash.replace('#',''));
+show(start>=0?start:0);
+</script>
+</body>
+</html>
